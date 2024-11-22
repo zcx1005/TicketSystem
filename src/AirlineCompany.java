@@ -1,3 +1,5 @@
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class AirlineCompany implements AirlineManagement {
@@ -74,34 +76,47 @@ public class AirlineCompany implements AirlineManagement {
      * @param newArrivalTime 新的到达时间
      */
     @Override
-    public void delayFlight(String flightNumber, String newDepartureTime, String newArrivalTime) {
+    public void delayFlight(String flightNumber, LocalDateTime newDepartureTime, LocalDateTime newArrivalTime) {
         // 获取目标航班
         Flight targetFlight = getFlightDetails(flightNumber);
 
+        // 时间格式化器
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
         if (targetFlight != null) {
-            // 更新航班时间并通知乘客
-            targetFlight.setDepartureTime(newDepartureTime);
-            targetFlight.setArrivalTime(newArrivalTime);
-            targetFlight.setDelay(true);
-            System.out.println("Flight " + flightNumber + " has been delayed. New departure time: "
-                    + newDepartureTime + ", new arrival time: " + newArrivalTime);
+            try {
+                // 更新航班时间并通知乘客
+                targetFlight.setDepartureTime(newDepartureTime);
+                targetFlight.setArrivalTime(newArrivalTime);
+                targetFlight.setDelay(true);
 
-            // 检查是否有乘客预定
-            if (targetFlight.getPassengers().isEmpty()) {
-                System.out.println("No passengers have booked this flight.");
-            } else {
-                // 使用延误通知策略通知乘客
-                passengerNotification = new DelayNotificationStrategy(flights); // 使用延误通知策略
-                passengerNotification.sendNotification(flightNumber, "The flight has been delayed. New departure time: "
-                        + newDepartureTime + ", new arrival time: " + newArrivalTime);
+                // 输出更新后的航班信息
+                System.out.println("Flight " + flightNumber + " has been delayed. New departure time: "
+                        + newDepartureTime.format(formatter) + ", new arrival time: " + newArrivalTime.format(formatter));
 
-                System.out.println("All passengers who have booked this flight have been notified about the delay.");
+                // 检查是否有乘客预定
+                if (targetFlight.getPassengers().isEmpty()) {
+                    System.out.println("No passengers have booked this flight.");
+                } else {
+                    // 使用延误通知策略通知乘客
+                    passengerNotification = new DelayNotificationStrategy(flights); // 使用延误通知策略
+                    passengerNotification.sendNotification(flightNumber, "The flight has been delayed. New departure time: "
+                            + newDepartureTime.format(formatter) + ", new arrival time: " + newArrivalTime.format(formatter));
+
+                    System.out.println("All passengers who have booked this flight have been notified about the delay.");
+                }
+
+            } catch (Exception e) {
+                // 捕捉解析时间或其他错误，并打印错误信息
+                System.out.println("Error: Unable to process flight delay. " + e.getMessage());
             }
 
         } else {
-            System.out.println("Flight " + flightNumber + " not found."); // 未找到航班
+            // 如果没有找到目标航班
+            System.out.println("Error: Flight " + flightNumber + " not found.");
         }
     }
+
 
 
     /**
@@ -162,6 +177,7 @@ public class AirlineCompany implements AirlineManagement {
      */
     public List<Flight> getNearlyFullFlights() {
         List<Flight> nearlyFullFlights = new ArrayList<>();
+        List<Flight> allFlights = new ArrayList<>();  // 用来保存所有航班
 
         // 遍历所有航班，计算预定座位比例
         for (Flight flight : flights) {
@@ -171,9 +187,19 @@ public class AirlineCompany implements AirlineManagement {
             // 判断是否超过 90%
             if ((double) bookedPassengers / capacity > 0.9) {
                 nearlyFullFlights.add(flight); // 添加到快满员列表
+            } else {
+                allFlights.add(flight); // 如果座位充足，添加到所有航班列表
             }
         }
 
+        if (nearlyFullFlights.isEmpty()) {
+            // 如果没有快满员航班，返回所有航班并提示座位充足
+            System.out.println("All flights have sufficient available seats.");
+            return allFlights;
+        }
+
+        // 返回快满员航班列表
         return nearlyFullFlights;
     }
+
 }

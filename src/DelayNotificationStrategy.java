@@ -24,20 +24,25 @@ public class DelayNotificationStrategy implements PassengerNotification {
      */
     @Override
     public void sendNotification(String flightNumber, String message) {
-        // Iterate over the flight list to find the target flight
+        // 查找航班
+        Flight flight = getFlightDetails(flightNumber);
+        if (flight != null) {
+            // 遍历乘客并发送通知
+            for (Passenger passenger : flight.getPassengers()) {
+                System.out.println("Sending delay notification to " + passenger.getName() + ": " + message);
+                // 这里可以模拟发送邮件或短信等
+            }
+        } else {
+            System.out.println("Flight " + flightNumber + " not found.");
+        }
+    }
+
+    private Flight getFlightDetails(String flightNumber) {
         for (Flight flight : flights) {
             if (flight.getFlightNumber().equals(flightNumber)) {
-                // If the flight is found, notify all passengers
-                for (Passenger passenger : flight.getPassengers()) {
-                    System.out.println("Dear " + passenger.getName() + ",");
-                    System.out.println("We regret to inform you that your flight " + flightNumber + " is delayed.");
-                    System.out.println(message); // Additional delay information
-                    System.out.println("Thank you for your understanding.");
-                }
-                return; // Exit after sending notifications for the matched flight
+                return flight;
             }
         }
-        // If no flight matches the provided flight number
-        System.out.println("Flight " + flightNumber + " not found.");
+        return null;
     }
 }

@@ -1,3 +1,4 @@
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AirlineManagement {
@@ -19,7 +20,7 @@ public interface AirlineManagement {
      * @param newDepartureTime 新的起飞时间
      * @param newArrivalTime 新的到达时间
      */
-    void delayFlight(String flightNumber, String newDepartureTime, String newArrivalTime);
+    void delayFlight(String flightNumber, LocalDateTime newDepartureTime, LocalDateTime newArrivalTime);
 
     /**
      * 获取航班详情
