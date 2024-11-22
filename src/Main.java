@@ -31,6 +31,7 @@ public class Main {
         airlineCompany.delayFlight("C919","08:30AM","17:30PM");
         System.out.println(getF1);
         airlineCompany.cancelFlight("C919");
+        System.out.println("test");
 
     }
 }
