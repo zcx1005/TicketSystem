@@ -19,7 +19,7 @@ public class Flight {
     // 构造方法
     public Flight(String flightNumber, String departure, String destination,
                   LocalDateTime departureTime, LocalDateTime arrivalTime, int capacity,
-                  List<Passenger> passengers,List<Passenger> vip) {
+                  List<Passenger> passengers, List<Passenger> vip) {
         this.flightNumber = flightNumber;
         this.departure = departure;
         this.destination = destination;
@@ -29,7 +29,7 @@ public class Flight {
         this.capacity = capacity;
         this.firstClassCapacity = (int) (capacity * 0.1); // 头等舱容量为总容量的20%
         this.economyClassCapacity = capacity - firstClassCapacity; // 剩余为经济舱容量
-        this.isOpenForReservation = false;
+        this.isOpenForReservation = true;
         this.passengers = passengers;
         this.vip = vip;
         checkReservationStatus(); // Check if reservation should be closed
@@ -108,6 +108,9 @@ public class Flight {
         }
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     @Override
     public String toString() {
@@ -118,7 +121,7 @@ public class Flight {
                 departureTime.format(formatter) + " ~ " + arrivalTime.format(formatter) + " | " +
                 "Delay: " + (isDelay ? "Yes" : "No") + " | " +
                 "Capacity: " + capacity + " | " +
-                "First: " + getFirstClassCapacity() +" · "+ "Economy: " + getEconomyClassCapacity() + " | " +
+                "First: " + getFirstClassCapacity() + " · " + "Economy: " + getEconomyClassCapacity() + " | " +
                 "Passengers: " + (passengers.isEmpty() ? 0 : passengers.size()) + " | " +
                 "Open for Reservation: " + (isOpenForReservation ? "Yes" : "No");
     }
@@ -141,52 +144,57 @@ public class Flight {
             return "Invalid seat type. Please choose 'FirstClass' or 'Economy'.";
         }
 
-        //检查预定与现有预定是否冲突
-        if(!passenger.isConflict(this)){
+        // 检查预定与现有预定是否冲突
+        if (!passenger.isConflict(this)) {
             return "Conflict detected: Cannot book flight " + flightNumber;
         }
 
-        // 根据座位类型检查容量
-        if (seatType.equalsIgnoreCase("FirstClass")) {
-            if (firstClassCapacity > 0) {
-                firstClassCapacity--; // 减少头等舱容量
-            } else {
-                return "No remaining seats in FirstClass.";
-            }
-        } else if (seatType.equalsIgnoreCase("Economy")) {
-            if (economyClassCapacity > 0) {
-                economyClassCapacity--; // 减少经济舱容量
-            } else {
-                return "No remaining seats in Economy.";
-            }
+        // 减少座位容量
+        if (!reduceSeatCapacity(seatType)) {
+            return "No remaining seats in " + seatType + ".";
         }
 
         // 添加乘客到列表
         passengers.add(passenger);
 
-        //更新乘客自己的预定名单
-        passenger.setReservations(this,seatType,service);
+        // 更新乘客自己的预定名单
+        passenger.setReservations(this, seatType, service);
 
         // 检查是否需要关闭预定
         checkReservationStatus();
 
-        if(vip.contains(passenger)){
-            return "Seat successfully booked for " + passenger.getName() + " in " + seatType + " and "
-                    +"you can enjoy a 15% discount on the ticket price.";
-        }else{
-            return "Seat successfully booked for " + passenger.getName() + " in " + seatType + ".";
+        // 返回结果消息
+        String resultMessage = "Seat successfully booked for " + passenger.getName() + " in " + seatType + ".";
+        if (vip.contains(passenger)) {
+            resultMessage += " You can enjoy a 15% discount on the ticket price.";
         }
+        return resultMessage;
+    }
+
+    private boolean reduceSeatCapacity(String seatType) {
+        if (seatType.equalsIgnoreCase("FirstClass")) {
+            if (firstClassCapacity > 0) {
+                firstClassCapacity--;
+                return true;
+            }
+        } else if (seatType.equalsIgnoreCase("Economy")) {
+            if (economyClassCapacity > 0) {
+                economyClassCapacity--;
+                return true;
+            }
+        }
+        return false;
     }
 
     //用户取消预定后，修改对应座位数,vip用户免除此次费用
-    public void update(String seatType,Passenger passenger){
-        if(vip.contains(passenger)){
+    public void update(String seatType, Passenger passenger) {
+        if (vip.contains(passenger)) {
             System.out.println("You are a VIP, so we will waive the service fee for you this time");
         }
-        if(seatType.equalsIgnoreCase("FirstClass")){
+        if (seatType.equalsIgnoreCase("FirstClass")) {
             firstClassCapacity++;
             System.out.println("You need to pay an additional 15% of the first-class ticket price as a handling fee");
-        }else{
+        } else {
             economyClassCapacity++;
             System.out.println("You need to pay an additional 10% of the economy-class ticket price as a handling fee");
         }
@@ -200,19 +208,19 @@ public class Flight {
     }
 
     //用户修改预定后
-    public void modify(String newSeatType, Passenger passenger){
-        if(newSeatType.equalsIgnoreCase("FirstClass")){
+    public void modify(String newSeatType, Passenger passenger) {
+        if (newSeatType.equalsIgnoreCase("FirstClass")) {
             economyClassCapacity++;
             firstClassCapacity--;
             System.out.println("Please pay the upgrade fee.");
-        }else{
+        } else {
             firstClassCapacity++;
             economyClassCapacity--;
             System.out.println("The fare difference will be refunded to your account.");
         }
-        if(vip.contains(passenger)){
+        if (vip.contains(passenger)) {
             System.out.println("You are a VIP, so we will waive the service fee for you this time");
-        }else{
+        } else {
             System.out.println("You need to pay a 5% service fee on the ticket price.");
         }
 

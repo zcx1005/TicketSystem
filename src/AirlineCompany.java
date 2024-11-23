@@ -13,23 +13,24 @@ public class AirlineCompany implements AirlineManagement {
         this.flights = new ArrayList<>();
     }
 
-    public String  getName() {
+    public String getName() {
         return this.name + " AirlineCompany";
     }
 
 
     /**
      * 添加航班
+     *
      * @param flight 要添加的航班对象
      */
     @Override
-    public void addFlight(Flight flight) {
+    public boolean addFlight(Flight flight) {
         // 验证航班信息是否完整
-        if (flight.getDepartureTime() == null || flight.getArrivalTime() == null ||
+        if (flight.getFlightNumber().isEmpty() || flight.getDepartureTime() == null || flight.getArrivalTime() == null ||
                 flight.getDeparture() == null || flight.getDestination() == null ||
                 flight.getCapacity() <= 0) {
             System.out.println("Incomplete flight information. Please provide all details.");
-            return; // 航班信息不完整，终止操作
+            return false; // 航班信息不完整，终止操作
         }
 
         // 将航班添加到航班列表中
@@ -37,90 +38,103 @@ public class AirlineCompany implements AirlineManagement {
         flight.setOpenForReservation(true); // 设置航班开放预订
         System.out.println("Flight " + flight.getFlightNumber() + " from " + flight.getDeparture() +
                 " to " + flight.getDestination() + " has been successfully added.");
+        return true;
     }
 
     /**
      * 取消航班
+     *
      * @param flightNumber 要取消的航班编号
      */
     @Override
     public void cancelFlight(String flightNumber) {
-        // 获取目标航班
-        Flight targetFlight = getFlightDetails(flightNumber);
+        try {
+            // 获取目标航班
+            Flight targetFlight = getFlightDetails(flightNumber);
 
-        if (targetFlight != null) {
-            // 检查是否有乘客预定此航班
+            if (targetFlight == null) {
+                System.out.println("Flight " + flightNumber + " not found.");
+                return;
+            }
+
+            // 如果没有乘客预订
             if (targetFlight.getPassengers().isEmpty()) {
+                flights.remove(targetFlight); // 从航班列表中移除航班
                 System.out.println("No passengers have booked this flight. The flight has been successfully cancelled.");
             } else {
-                // 移除航班并通知乘客
-                flights.remove(targetFlight);
-                System.out.println("Flight " + flightNumber + " has been cancelled.");
+                // 标记航班为已取消
+                targetFlight.setStatus("Cancelled");
+                System.out.println("Flight " + flightNumber + " has been marked as cancelled.");
 
-                passengerNotification = new CancelNotificationStrategy(flights); // 使用取消策略
-                passengerNotification.sendNotification(flightNumber,
-                        "We apologize for the inconvenience. Please contact our customer service for assistance.");
+                // 通知乘客
+                FlightNotificationStrategy notificationStrategy = new FlightNotificationStrategy(flights);
+                notificationStrategy.sendNotification(
+                        flightNumber,
+                        "We apologize for the inconvenience. Please contact our customer service for assistance.",
+                        "Cancellation"
+                );
 
                 System.out.println("All passengers who have booked this flight have been notified about the cancellation.");
             }
-        } else {
-            System.out.println("Flight " + flightNumber + " not found."); // 未找到航班
+        } catch (Exception e) {
+            System.err.println("An error occurred while cancelling the flight: " + e.getMessage());
         }
     }
 
 
     /**
      * 延误航班
-     * @param flightNumber 要延误的航班编号
+     *
+     * @param flightNumber     要延误的航班编号
      * @param newDepartureTime 新的起飞时间
-     * @param newArrivalTime 新的到达时间
+     * @param newArrivalTime   新的到达时间
      */
     @Override
     public void delayFlight(String flightNumber, LocalDateTime newDepartureTime, LocalDateTime newArrivalTime) {
         // 获取目标航班
         Flight targetFlight = getFlightDetails(flightNumber);
 
-        // 时间格式化器
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        if (targetFlight == null) {
+            throw new IllegalArgumentException("Flight " + flightNumber + " not found.");
+        }
 
-        if (targetFlight != null) {
-            try {
-                // 更新航班时间并通知乘客
-                targetFlight.setDepartureTime(newDepartureTime);
-                targetFlight.setArrivalTime(newArrivalTime);
-                targetFlight.setDelay(true);
+        // 检查新的起飞时间和到达时间是否晚于当前时间
+        if (newDepartureTime.isAfter(targetFlight.getDepartureTime())
+                && newArrivalTime.isAfter(targetFlight.getArrivalTime())) {
 
-                // 输出更新后的航班信息
-                System.out.println("Flight " + flightNumber + " has been delayed. New departure time: "
-                        + newDepartureTime.format(formatter) + ", new arrival time: " + newArrivalTime.format(formatter));
+            // 更新航班时间
+            targetFlight.setDepartureTime(newDepartureTime);
+            targetFlight.setArrivalTime(newArrivalTime);
+            targetFlight.setDelay(true);
 
-                // 检查是否有乘客预定
-                if (targetFlight.getPassengers().isEmpty()) {
-                    System.out.println("No passengers have booked this flight.");
-                } else {
-                    // 使用延误通知策略通知乘客
-                    passengerNotification = new DelayNotificationStrategy(flights); // 使用延误通知策略
-                    passengerNotification.sendNotification(flightNumber, "The flight has been delayed. New departure time: "
-                            + newDepartureTime.format(formatter) + ", new arrival time: " + newArrivalTime.format(formatter));
+            // 输出更新后的航班信息
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            System.out.println("Flight " + flightNumber + " has been delayed. New departure time: "
+                    + newDepartureTime.format(formatter) + ", new arrival time: " + newArrivalTime.format(formatter));
 
-                    System.out.println("All passengers who have booked this flight have been notified about the delay.");
-                }
+            // 检查是否有乘客预定
+            if (targetFlight.getPassengers().isEmpty()) {
+                System.out.println("No passengers have booked this flight.");
+            } else {
+                // 使用统一的通知策略发送延误通知
+                FlightNotificationStrategy notificationStrategy = new FlightNotificationStrategy(flights);
+                notificationStrategy.sendNotification(flightNumber,
+                        "The flight has been delayed. New departure time: "
+                                + newDepartureTime.format(formatter) + ", new arrival time: "
+                                + newArrivalTime.format(formatter),
+                        "Delay");
 
-            } catch (Exception e) {
-                // 捕捉解析时间或其他错误，并打印错误信息
-                System.out.println("Error: Unable to process flight delay. " + e.getMessage());
+                System.out.println("All passengers who have booked this flight have been notified about the delay.");
             }
-
         } else {
-            // 如果没有找到目标航班
-            System.out.println("Error: Flight " + flightNumber + " not found.");
+            throw new IllegalArgumentException("New departure and arrival times must be later than the original times.");
         }
     }
 
 
-
     /**
      * 获取航班详细信息
+     *
      * @param flightNumber 航班编号
      * @return 航班对象，未找到返回 null
      */
@@ -137,6 +151,7 @@ public class AirlineCompany implements AirlineManagement {
 
     /**
      * 获取所有航班列表
+     *
      * @return 所有航班的列表
      */
     @Override
@@ -146,6 +161,7 @@ public class AirlineCompany implements AirlineManagement {
 
     /**
      * 获取热门航线，根据航班数量返回前几个热门航线
+     *
      * @return 热门航线及其航班数量列表
      */
     public List<String> getPopularRoutes() {
@@ -153,7 +169,7 @@ public class AirlineCompany implements AirlineManagement {
 
         // 统计每条航线的航班数量
         for (Flight flight : flights) {
-            String route = flight.getDeparture() + "-" + flight.getDestination();
+            String route = flight.getDeparture() + " - " + flight.getDestination();
             routeCountMap.put(route, routeCountMap.getOrDefault(route, 0) + 1);
         }
 
@@ -173,6 +189,7 @@ public class AirlineCompany implements AirlineManagement {
 
     /**
      * 查看快满员的航班
+     *
      * @return 快满员的航班列表
      */
     public List<Flight> getNearlyFullFlights() {

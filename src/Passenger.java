@@ -6,37 +6,42 @@ public class Passenger {
     List<Reservation> reservations;
 
     public Passenger(String name, List<Reservation> reservations) {
-        this.name=name;
-        this.reservations=reservations;
+        this.name = name;
+        this.reservations = reservations;
     }
 
     public String getName() {
         return name;
     }
-    public List<Reservation> getReservations(){ return  reservations; }
+
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
 
     //订票成功后更新预定信息名单
-    public void setReservations(Flight flight, String sType, String ser){
-        Reservation res=new Reservation(flight,sType,ser);
+    public void setReservations(Flight flight, String sType, String ser) {
+        Reservation res = new Reservation(flight, sType, ser);
         reservations.add(res);
     }
 
     //判断与已预订航班是否冲突
     public boolean isConflict(Flight flight) {
-        for(Reservation res:reservations){
-            if(res.getMyFlight().conflictsWith(flight)){ return false; }
+        for (Reservation res : reservations) {
+            if (res.getMyFlight().conflictsWith(flight)) {
+                return false;
+            }
         }
         return true;
     }
 
-    // 根据航班，取消现有预定
-    public void cancelReservation(Flight flight){
-        for(Reservation res:reservations){
-            if(res.getMyFlight().equals(flight)){
+    //根据航班，取消现有预定
+    public void cancelReservation(Flight flight) {
+        for (Reservation res : reservations) {
+            if (res.getMyFlight().equals(flight)) {
                 reservations.remove(res);
                 System.out.println("Flight: " + flight.getFlightNumber()
                         + " canceled successfully.");
-                flight.update(res.getMySeatType(),this);
+                flight.update(res.getMySeatType(), this);
                 return;
             }
         }
@@ -45,13 +50,10 @@ public class Passenger {
         return;
     }
 
-
-
-
     //修改预定的航班
     public void modifyReservation(Flight curFlight, String seatType, String service) {
         // 检查座位类型是否有效
-        if (!seatType.equalsIgnoreCase("FirstClass") &&!seatType.equalsIgnoreCase("Economy")) {
+        if (!seatType.equalsIgnoreCase("FirstClass") && !seatType.equalsIgnoreCase("Economy")) {
             System.out.println("Invalid seat type. Please choose 'FirstClass' or 'Economy'.");
             return;
         }
@@ -88,14 +90,13 @@ public class Passenger {
         System.out.println("Flight " + curFlight.getFlightNumber() + " not found in reservations.");
     }
 
-
     //加入该航线的vip名单
-    public void registerVip(Flight flight){
+    public void registerVip(Flight flight) {
         flight.getVip().add(this);
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return name + " " + reservations;
     }
 }
