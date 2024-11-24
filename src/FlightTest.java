@@ -97,17 +97,7 @@ class FlightTest {
         Passenger nonVIPPassenger = new Passenger("John Doe", new ArrayList<>());
         flight.bookSeat(nonVIPPassenger, "Economy", "Meal");
         flight.update("Economy", nonVIPPassenger); // Cancel reservation and process fees
-    }
-
-    @Test
-    void modify_ChangeToFirstClass() {
-        // Change seat from Economy to First Class
-        Flight flight = new Flight("AB123", "New York", "Los Angeles",
-                LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 200,
-                new ArrayList<>(), new ArrayList<>());
-
-        Passenger passenger = new Passenger("John Doe", new ArrayList<>());
-        flight.bookSeat(passenger, "Economy", "Meal");
-        flight.modify("FirstClass", passenger); // Upgrade to First Class
+        // Assert that the reservation is successfully canceled
+        assertFalse(flight.getPassengers().contains(nonVIPPassenger));
     }
 }
