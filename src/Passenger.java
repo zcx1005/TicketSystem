@@ -1,6 +1,25 @@
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * The Passenger class represents a passenger who can make and manage flight reservations.
+ * A passenger can have multiple reservations for different flights. This class allows for
+ * operations such as adding, modifying, canceling reservations, checking for flight conflicts,
+ * and registering as a VIP on a flight. Each passenger has a name and a list of reservations
+ * associated with them.
+ *
+ * Key features:
+ * - Add a reservation for a flight.
+ * - Check if a conflict exists between a flight and existing reservations.
+ * - Cancel or modify a reservation.
+ * - Register the passenger as a VIP on a flight.
+ * - Provides a string representation of the passenger's details and their reservations.
+ *
+ * This class relies on the Reservation and Flight classes to function. A reservation holds details
+ * about a specific flight, seat type, and service type, while the Flight class represents flight
+ * details and the availability of seats.
+ */
+
 public class Passenger {
     private String name;  // The name of the passenger
     List<Reservation> reservations;  // A list of reservations made by the passenger

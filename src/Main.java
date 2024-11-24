@@ -105,21 +105,21 @@ public class Main {
                     System.out.println("4. Modify a reservation and if a passenger is not found, create one and book a seat ");
                     System.out.println("Enter passenger name: ");
                     passengerName = scanner.nextLine();
-
+                    // Find all passengers who match the input name
+                    List<Passenger> foundPassengersToModify = new ArrayList<>();
                     // Search for existing passengers, if not found, prompt and create a new passenger
-                    Passenger existingPassenger = null;
+                    //Passenger existingPassenger = null;
                     for (Passenger p : passengers) {
                         if (p.getName().equalsIgnoreCase(passengerName)) {
-                            existingPassenger = p;
-                            break;
+                            foundPassengersToModify.add(p); // Add all matching passengers to the list
                         }
                     }
 
-                    if (existingPassenger == null) {
+                    if (foundPassengersToModify.isEmpty()) {
                         System.out.println("Passenger not found. Creating a new passenger.");
                         // If the passenger cannot be found, create a new passenger instance and make a reservation
-                        existingPassenger = new Passenger(passengerName, new ArrayList<>());
-                        passengers.add(existingPassenger);  // Add new passengers to the list
+                        Passenger newPassenger = new Passenger(passengerName, new ArrayList<>());
+                        passengers.add(newPassenger);  // Add new passengers to the passenger list
 
                         // Make a new flight reservation
                         System.out.println("Enter flight number to book: ");
@@ -132,26 +132,29 @@ public class Main {
                             System.out.println("Enter service type: ");
                             String serviceType = scanner.nextLine();
                             // Make a new reservation
-                            System.out.println(selectedFlight.bookSeat(existingPassenger, seatType, serviceType));
+                            System.out.println(selectedFlight.bookSeat(newPassenger, seatType, serviceType));
                         } else {
                             System.out.println("Flight not found.");
                         }
                     } else {
-                        // If an existing passenger is found, modify the reservation
-                        System.out.println("Passenger found. Modifying reservation.");
-                        System.out.println("Enter flight number to modify reservation: ");
-                        flightNumber = scanner.nextLine();
-                        selectedFlight = airlineCompany.getFlightDetails(flightNumber);
+                        // If multiple passengers with the same name are found, modify their reservations one by one
+                        System.out.println("Found the following passengers with the same name as '" + passengerName + "':");
+                        for (Passenger passengerForModify : foundPassengersToModify) {
+                            System.out.println("Passenger: " + passengerForModify.getName() + " is modifying the reservation...");
+                            System.out.println("Please enter the flight number to modify: ");
+                            flightNumber = scanner.nextLine();
+                            selectedFlight = airlineCompany.getFlightDetails(flightNumber);
 
-                        if (selectedFlight != null) {
-                            System.out.println("Enter new seat type (FirstClass/Economy): ");
-                            String newSeatType = scanner.nextLine();
-                            System.out.println("Enter new service type: ");
-                            String newServiceType = scanner.nextLine();
-                            // Modify reservation
-                            existingPassenger.modifyReservation(selectedFlight, newSeatType, newServiceType);
-                        } else {
-                            System.out.println("Flight not found.");
+                            if (selectedFlight != null) {
+                                System.out.println("Enter new seat type (FirstClass/Economy): ");
+                                String newSeatType = scanner.nextLine();
+                                System.out.println("Enter new service type: ");
+                                String newServiceType = scanner.nextLine();
+                                // Modify reservation
+                                passengerForModify.modifyReservation(selectedFlight, newSeatType, newServiceType);
+                            } else {
+                                System.out.println("Flight not found.");
+                            }
                         }
                     }
                     break;
@@ -161,20 +164,21 @@ public class Main {
                     System.out.println("5. Cancel a reservation and if a passenger is not found, create one and book a seat");
                     System.out.println("Enter passenger name: ");
                     passengerName = scanner.nextLine();
-
+                    // Find all passengers who match the input name
+                    List<Passenger> foundPassengersToCancel = new ArrayList<>();
                     // Search for existing passengers, if not found, prompt and create a new passenger
-                    existingPassenger = null;
+                    //existingPassenger = null;
                     for (Passenger p : passengers) {
                         if (p.getName().equalsIgnoreCase(passengerName)) {
-                            existingPassenger = p;
-                            break;
+                            foundPassengersToCancel.add(p);
+
                         }
                     }
 
-                    if (existingPassenger == null) {
+                    if (foundPassengersToCancel.isEmpty()) {
                         System.out.println("Passenger not found. Creating a new passenger.");
                         // If the passenger cannot be found, create a new passenger instance and make a reservation
-                        existingPassenger = new Passenger(passengerName, new ArrayList<>());
+                        Passenger existingPassenger = new Passenger(passengerName, new ArrayList<>());
                         passengers.add(existingPassenger);  // Add new passengers to the list
 
                         // Make a new flight reservation
@@ -193,18 +197,21 @@ public class Main {
                             System.out.println("Flight not found.");
                         }
                     } else {
-                        // If an existing passenger is found, cancel the reservation
-                        System.out.println("Passenger found. Cancelling reservation.");
-                        System.out.println("Enter flight number to cancel reservation: ");
-                        flightNumber = scanner.nextLine();
-                        selectedFlight = airlineCompany.getFlightDetails(flightNumber);
+                        // If a passenger with the same name is found, cancel their reservation
+                        System.out.println("Found the following passengers with the same name as '" + passengerName + "':");
+                        for (Passenger passengerForCancel : foundPassengersToCancel) {
+                            System.out.println("Passenger: " + passengerForCancel.getName() + " is canceling the reservation...");
+                            System.out.println("Please enter the flight number to cancel the reservation: ");
+                            flightNumber = scanner.nextLine();
+                            selectedFlight = airlineCompany.getFlightDetails(flightNumber);
 
-                        if (selectedFlight != null) {
-                            // Execute cancellation of reservation
-                            existingPassenger.cancelReservation(selectedFlight);
-                            System.out.println("Reservation cancelled successfully.");
-                        } else {
-                            System.out.println("Flight not found.");
+                            if (selectedFlight != null) {
+                                // Execute the cancel reservation operation
+                                passengerForCancel.cancelReservation(selectedFlight);
+                                System.out.println("The reservation has been successfully cancelled.");
+                            } else {
+                                System.out.println("Flight not found.");
+                            }
                         }
                     }
                     break;
@@ -259,30 +266,37 @@ public class Main {
                         }
                     }
                     break;
+
                 case 9:
                     // View passenger reservations
                     System.out.println("9. View passenger reservations");
                     System.out.println("Enter passenger name: ");
                     passengerName = scanner.nextLine();
-                    existingPassenger = null;
+
+                    // Find all passengers who match the input name
+                    List<Passenger> foundPassengers = new ArrayList<>();
                     for (Passenger p : passengers) {
                         if (p.getName().equalsIgnoreCase(passengerName)) {
-                            existingPassenger = p;
-                            break;
+                            foundPassengers.add(p); // Add matching passengers to the list
                         }
                     }
-                    if (existingPassenger != null) {
-                        System.out.println("Passenger " + existingPassenger.getName() + "'s Reservations:");
-                        List<Reservation> reservations = existingPassenger.getReservations();
-                        if (reservations.isEmpty()) {
-                            System.out.println("No reservations found.");
-                        } else {
-                            for (Reservation reservation : reservations) {
-                                System.out.println(reservation.toString());
+
+                    if (!foundPassengers.isEmpty()) {
+                        // If a passenger with the same name is found, display their booking information
+                        System.out.println("Here are the reservation details for passengers with the name '" + passengerName + "':");
+                        for (Passenger foundPassenger : foundPassengers) {
+                            System.out.println("Passenger: " + foundPassenger.getName() + " Reservation Details:");
+                            List<Reservation> reservations = foundPassenger.getReservations();
+                            if (reservations.isEmpty()) {
+                                System.out.println("No reservations found.");
+                            } else {
+                                for (Reservation reservation : reservations) {
+                                    System.out.println(reservation.toString());
+                                }
                             }
                         }
                     } else {
-                        System.out.println("Passenger not found.");
+                        System.out.println("No passengers found with the name '" + passengerName + "'.");
                     }
                     break;
 
