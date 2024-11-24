@@ -9,7 +9,7 @@ class FlightTest {
 
     @Test
     void conflictsWith_NoConflict() {
-        // 创建两个完全不重叠的航班
+        // Create two flights with non-overlapping schedules
         Flight flight1 = new Flight("AB123", "New York", "Los Angeles",
                 LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 200,
                 new ArrayList<>(), new ArrayList<>());
@@ -22,7 +22,7 @@ class FlightTest {
 
     @Test
     void conflictsWith_CompleteConflict() {
-        // 创建两个完全重叠的航班
+        // Create two flights with completely overlapping schedules
         Flight flight1 = new Flight("AB123", "New York", "Los Angeles",
                 LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 200,
                 new ArrayList<>(), new ArrayList<>());
@@ -35,12 +35,12 @@ class FlightTest {
 
     @Test
     void bookSeat_ReservationClosed() {
-        // 模拟航班已满
+        // Simulate a flight with reservations closed
         Flight flight = new Flight("AB123", "New York", "Los Angeles",
                 LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 1,
                 new ArrayList<>(), new ArrayList<>());
 
-        flight.setOpenForReservation(false); // 设置航班为不可预定
+        flight.setOpenForReservation(false); // Set reservation status to closed
         Passenger passenger = new Passenger("John Doe", new ArrayList<>());
 
         String result = flight.bookSeat(passenger, "Economy", "Meal");
@@ -49,19 +49,19 @@ class FlightTest {
 
     @Test
     void bookSeat_InvalidSeatType() {
-        // 测试无效座位类型
+        // Test booking with an invalid seat type
         Flight flight = new Flight("AB123", "New York", "Los Angeles",
                 LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 200,
                 new ArrayList<>(), new ArrayList<>());
 
         Passenger passenger = new Passenger("John Doe", new ArrayList<>());
-        String result = flight.bookSeat(passenger, "Business", "Meal"); // 无效座位类型
+        String result = flight.bookSeat(passenger, "Business", "Meal"); // Invalid seat type
         assertEquals("Invalid seat type. Please choose 'FirstClass' or 'Economy'.", result);
     }
 
     @Test
     void bookSeat_FullEconomy() {
-        // 模拟经济舱座位已满
+        // Simulate economy class being fully booked
         Flight flight = new Flight("AB123", "New York", "Los Angeles",
                 LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 1,
                 new ArrayList<>(), new ArrayList<>());
@@ -74,12 +74,12 @@ class FlightTest {
 
     @Test
     void bookSeat_VIPDiscount() {
-        // VIP用户预定时测试
+        // Test booking for VIP passengers
         Flight flight = new Flight("AB123", "New York", "Los Angeles",
                 LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 200,
                 new ArrayList<>(), new ArrayList<>());
 
-        Passenger vipPassenger = new Passenger("VIP John", new ArrayList<>()); // 创建VIP乘客
+        Passenger vipPassenger = new Passenger("VIP John", new ArrayList<>()); // Create VIP passenger
         flight.bookSeat(vipPassenger, "FirstClass", "Meal");
 
         String result = flight.bookSeat(new Passenger("Regular Jane", new ArrayList<>()), "Economy", "Meal");
@@ -89,25 +89,25 @@ class FlightTest {
 
     @Test
     void update_CancelNonVIP() {
-        // 非VIP用户取消预定
+        // Cancel reservation for non-VIP passenger
         Flight flight = new Flight("AB123", "New York", "Los Angeles",
                 LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 200,
                 new ArrayList<>(), new ArrayList<>());
 
         Passenger nonVIPPassenger = new Passenger("John Doe", new ArrayList<>());
         flight.bookSeat(nonVIPPassenger, "Economy", "Meal");
-        flight.update("Economy", nonVIPPassenger); // 取消预定并处理费用
+        flight.update("Economy", nonVIPPassenger); // Cancel reservation and process fees
     }
 
     @Test
     void modify_ChangeToFirstClass() {
-        // 将经济舱更改为头等舱
+        // Change seat from Economy to First Class
         Flight flight = new Flight("AB123", "New York", "Los Angeles",
                 LocalDateTime.of(2024, 11, 24, 10, 0), LocalDateTime.of(2024, 11, 24, 14, 0), 200,
                 new ArrayList<>(), new ArrayList<>());
 
         Passenger passenger = new Passenger("John Doe", new ArrayList<>());
         flight.bookSeat(passenger, "Economy", "Meal");
-        flight.modify("FirstClass", passenger); // 升级到头等舱
+        flight.modify("FirstClass", passenger); // Upgrade to First Class
     }
 }

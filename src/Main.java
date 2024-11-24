@@ -10,25 +10,25 @@ public class Main {
         AirlineCompany airlineCompany = new AirlineCompany("Mamba");
         System.out.println("Welcome to " + airlineCompany.getName());
 
-        // 创建一个自定义的 DateTimeFormatter 来解析日期时间字符串
+        // Create a custom VNet to parse date and time strings
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-        //创建新航班
+        // Create a new flight
         Flight flight1 = new Flight("C919", "China",
                 "New York", LocalDateTime.parse("2024-11-11 10:00", formatter), LocalDateTime.parse("2024-11-11 15:00", formatter), 160, new ArrayList<>(), new ArrayList<>());
         Flight flight2 = new Flight("C999", "Beijing",
                 "Guangzhou", LocalDateTime.parse("2024-11-11 08:00", formatter), LocalDateTime.parse("2024-11-11 10:30", formatter), 140, new ArrayList<>(), new ArrayList<>());
-        //添加新航班
+        // Add a new flight
         airlineCompany.addFlight(flight1);
         airlineCompany.addFlight(flight2);
-        Flight selectedFlight = null; // 外部声明变量
-        Passenger passenger = null;   // 外部声明变量
-        List<Passenger> passengers = new ArrayList<>(); // 存储所有创建的乘客实例
+        Flight selectedFlight = null; // External declaration variables
+        Passenger passenger = null;   // External declaration variables
+        List<Passenger> passengers = new ArrayList<>(); // Store all created passenger instances
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;
 
         while (!exit) {
-            // 打印菜单
+            // Print menu
             System.out.println("\n=== Airline Booking System ===");
             System.out.println("1. View all flights");
             System.out.println("2. View flight details");
@@ -43,7 +43,7 @@ public class Main {
             System.out.println("11. Exit");
             System.out.println("Choose an option: ");
 
-            // 获取用户选择
+            // Obtain user selection
             int choice = scanner.nextInt();
             scanner.nextLine();
 
@@ -76,14 +76,15 @@ public class Main {
                     }
                     break;
 
-                case 3://无论预定成功与否都会创建！，就是在passenger中。不一定放到fight中的passenger列表中。
+                case 3:// Whether the reservation is successful or not, it will be created!,
+                    // It's in the passenger. Not necessarily included in the passenger list in Fight.
                     // Book a seat
                     System.out.println("3.Create a passenger and book a seat");
                     System.out.println("Enter passenger name: ");
                     String passengerName = scanner.nextLine();
                     passenger = new Passenger(passengerName, new ArrayList<>());
 
-                    passengers.add(passenger);  // 将新的乘客对象添加到列表中
+                    passengers.add(passenger);  // Add a new passenger object to the list
 
                     System.out.println("Enter flight number to book: ");
                     flightNumber = scanner.nextLine();
@@ -93,7 +94,7 @@ public class Main {
                         String seatType = scanner.nextLine();
                         System.out.println("Enter service type: ");
                         String serviceType = scanner.nextLine();
-                        System.out.println(selectedFlight.bookSeat(passenger, seatType, serviceType));//如果不是Economy和FirstClass，会提示插入不进去
+                        System.out.println(selectedFlight.bookSeat(passenger, seatType, serviceType));//If it is not Economy and FirstClass, it will prompt that it cannot be inserted
                     } else {
                         System.out.println("Flight not found.");
                     }
@@ -105,7 +106,7 @@ public class Main {
                     System.out.println("Enter passenger name: ");
                     passengerName = scanner.nextLine();
 
-                    // 查找已有的乘客，如果没有找到则提示并创建新乘客
+                    // Search for existing passengers, if not found, prompt and create a new passenger
                     Passenger existingPassenger = null;
                     for (Passenger p : passengers) {
                         if (p.getName().equalsIgnoreCase(passengerName)) {
@@ -116,11 +117,11 @@ public class Main {
 
                     if (existingPassenger == null) {
                         System.out.println("Passenger not found. Creating a new passenger.");
-                        // 如果没有找到该乘客，则创建新乘客实例并进行预定
+                        // If the passenger cannot be found, create a new passenger instance and make a reservation
                         existingPassenger = new Passenger(passengerName, new ArrayList<>());
-                        passengers.add(existingPassenger);  // 将新乘客添加到列表中
+                        passengers.add(existingPassenger);  // Add new passengers to the list
 
-                        // 进行新的航班预定
+                        // Make a new flight reservation
                         System.out.println("Enter flight number to book: ");
                         flightNumber = scanner.nextLine();
                         selectedFlight = airlineCompany.getFlightDetails(flightNumber);
@@ -130,13 +131,13 @@ public class Main {
                             String seatType = scanner.nextLine();
                             System.out.println("Enter service type: ");
                             String serviceType = scanner.nextLine();
-                            // 进行新的预定
+                            // Make a new reservation
                             System.out.println(selectedFlight.bookSeat(existingPassenger, seatType, serviceType));
                         } else {
                             System.out.println("Flight not found.");
                         }
                     } else {
-                        // 如果找到了已有的乘客，则修改预定
+                        // If an existing passenger is found, modify the reservation
                         System.out.println("Passenger found. Modifying reservation.");
                         System.out.println("Enter flight number to modify reservation: ");
                         flightNumber = scanner.nextLine();
@@ -147,7 +148,7 @@ public class Main {
                             String newSeatType = scanner.nextLine();
                             System.out.println("Enter new service type: ");
                             String newServiceType = scanner.nextLine();
-                            // 修改预定
+                            // Modify reservation
                             existingPassenger.modifyReservation(selectedFlight, newSeatType, newServiceType);
                         } else {
                             System.out.println("Flight not found.");
@@ -161,7 +162,7 @@ public class Main {
                     System.out.println("Enter passenger name: ");
                     passengerName = scanner.nextLine();
 
-                    // 查找已有的乘客，如果没有找到则提示并创建新乘客
+                    // Search for existing passengers, if not found, prompt and create a new passenger
                     existingPassenger = null;
                     for (Passenger p : passengers) {
                         if (p.getName().equalsIgnoreCase(passengerName)) {
@@ -172,11 +173,11 @@ public class Main {
 
                     if (existingPassenger == null) {
                         System.out.println("Passenger not found. Creating a new passenger.");
-                        // 如果没有找到该乘客，则创建新乘客实例并进行预定
+                        // If the passenger cannot be found, create a new passenger instance and make a reservation
                         existingPassenger = new Passenger(passengerName, new ArrayList<>());
-                        passengers.add(existingPassenger);  // 将新乘客添加到列表中
+                        passengers.add(existingPassenger);  // Add new passengers to the list
 
-                        // 进行新的航班预定
+                        // Make a new flight reservation
                         System.out.println("Enter flight number to book: ");
                         flightNumber = scanner.nextLine();
                         selectedFlight = airlineCompany.getFlightDetails(flightNumber);
@@ -186,20 +187,20 @@ public class Main {
                             String seatType = scanner.nextLine();
                             System.out.println("Enter service type: ");
                             String serviceType = scanner.nextLine();
-                            // 进行新的预定
+                            // Make a new reservation
                             System.out.println(selectedFlight.bookSeat(existingPassenger, seatType, serviceType));
                         } else {
                             System.out.println("Flight not found.");
                         }
                     } else {
-                        // 如果找到了已有的乘客，则取消预定
+                        // If an existing passenger is found, cancel the reservation
                         System.out.println("Passenger found. Cancelling reservation.");
                         System.out.println("Enter flight number to cancel reservation: ");
                         flightNumber = scanner.nextLine();
                         selectedFlight = airlineCompany.getFlightDetails(flightNumber);
 
                         if (selectedFlight != null) {
-                            // 执行取消预定
+                            // Execute cancellation of reservation
                             existingPassenger.cancelReservation(selectedFlight);
                             System.out.println("Reservation cancelled successfully.");
                         } else {
@@ -215,11 +216,11 @@ public class Main {
                     flightNumber = scanner.nextLine();
                     selectedFlight = airlineCompany.getFlightDetails(flightNumber);
                     if (selectedFlight != null) {
-                        System.out.println("Enter new departure time (yyyy-MM-dd HH:mm): ");//这边异常处理！！！此外两个不能是同一个时间，
+                        System.out.println("Enter new departure time (yyyy-MM-dd HH:mm): ");
                         String newDepartureTime = scanner.nextLine();
                         System.out.println("Enter new arrival time (yyyy-MM-dd HH:mm): ");
                         String newArrivalTime = scanner.nextLine();
-                        // 设置航班延误，直接调用 airlineCompany 的 delayFlight 方法
+                        // Set flight delay and directly call the delayFlight method of airlineCompany
                         airlineCompany.delayFlight(flightNumber,
                                 LocalDateTime.parse(newDepartureTime, formatter),
                                 LocalDateTime.parse(newArrivalTime, formatter));

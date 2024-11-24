@@ -1,42 +1,47 @@
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Interface representing airline management functionalities.
+ */
 public interface AirlineManagement {
+
     /**
-     * 添加航班
+     * Adds a flight to the airline's schedule.
      *
-     * @param flight 航班对象
+     * @param flight the flight object to be added
+     * @return true if the flight is successfully added, false otherwise
      */
     boolean addFlight(Flight flight);
 
     /**
-     * 取消航班
+     * Cancels a flight in the airline's schedule.
      *
-     * @param flightNumber 航班编号
+     * @param flightNumber the flight number of the flight to be canceled
      */
     void cancelFlight(String flightNumber);
 
     /**
-     * 延误航班
+     * Delays a flight by updating its departure and arrival times.
      *
-     * @param flightNumber     航班编号
-     * @param newDepartureTime 新的起飞时间
-     * @param newArrivalTime   新的到达时间
+     * @param flightNumber     the flight number of the flight to be delayed
+     * @param newDepartureTime the new departure time of the flight
+     * @param newArrivalTime   the new arrival time of the flight
      */
     void delayFlight(String flightNumber, LocalDateTime newDepartureTime, LocalDateTime newArrivalTime);
 
     /**
-     * 获取航班详情
+     * Retrieves the details of a specific flight.
      *
-     * @param flightNumber 航班编号
-     * @return 航班对象
+     * @param flightNumber the flight number of the desired flight
+     * @return the flight object corresponding to the flight number, or null if not found
      */
     Flight getFlightDetails(String flightNumber);
 
     /**
-     * 获取所有航班
+     * Retrieves a list of all flights in the airline's schedule.
      *
-     * @return 航班列表
+     * @return a list containing all flights
      */
     List<Flight> getAllFlights();
 }

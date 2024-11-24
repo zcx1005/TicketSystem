@@ -2,6 +2,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.time.LocalDateTime;
 
+/**
+ * Flight class of AirlinBookingSystem used to represent flight information and implement related operations.
+ *
+ * Information includes flight number, departure, destination, departure time, arrival time, delay or not, capacity, first Class capacity, Economy class capacity, passenger list, whether reservations are open, VIP passenger list
+ @author: CPT403-Group 9
+ */
+
 public class Flight {
     private String flightNumber;
     private String departure;
@@ -15,6 +22,7 @@ public class Flight {
     private List<Passenger> passengers;
     private boolean isOpenForReservation;
     private List<Passenger> vip;
+    private String status;
 
     // 构造方法
     public Flight(String flightNumber, String departure, String destination,
@@ -27,12 +35,13 @@ public class Flight {
         this.arrivalTime = arrivalTime;
         this.isDelay = false;
         this.capacity = capacity;
-        this.firstClassCapacity = (int) (capacity * 0.1); // 头等舱容量为总容量的20%
-        this.economyClassCapacity = capacity - firstClassCapacity; // 剩余为经济舱容量
+        this.firstClassCapacity = (int) (capacity * 0.1); // // First class capacity is 10% of the total capacity
+        this.economyClassCapacity = capacity - firstClassCapacity; // remaining capacity is economy class
         this.isOpenForReservation = true;
         this.passengers = passengers;
         this.vip = vip;
         checkReservationStatus(); // Check if reservation should be closed
+        this.status = "";
     }
 
     // Getters
@@ -56,10 +65,6 @@ public class Flight {
         return arrivalTime;
     }
 
-    public void setDelay(boolean isDelay) {
-        this.isDelay = isDelay;
-    }
-
     public int getCapacity() {
         return capacity;
     }
@@ -68,17 +73,11 @@ public class Flight {
         return firstClassCapacity;
     }
 
-    public void setFirstClassCapacity(int firstClassCapacity) {
-        this.firstClassCapacity = firstClassCapacity;
-    }
 
     public int getEconomyClassCapacity() {
         return economyClassCapacity;
     }
 
-    public void setEconomyClassCapacity(int economyClassCapacity) {
-        this.economyClassCapacity = economyClassCapacity;
-    }
 
     public List<Passenger> getPassengers() {
         return passengers;
@@ -89,12 +88,24 @@ public class Flight {
     }
 
     // Setters
+    public void setDelay(boolean isDelay) {
+        this.isDelay = isDelay;
+    }
+
     public void setDepartureTime(LocalDateTime departureTime) {
         this.departureTime = departureTime;
     }
 
     public void setArrivalTime(LocalDateTime arrivalTime) {
         this.arrivalTime = arrivalTime;
+    }
+
+    public void setFirstClassCapacity(int firstClassCapacity) {
+        this.firstClassCapacity = firstClassCapacity;
+    }
+
+    public void setEconomyClassCapacity(int economyClassCapacity) {
+        this.economyClassCapacity = economyClassCapacity;
     }
 
     public void setOpenForReservation(boolean openForReservation) {
@@ -112,9 +123,12 @@ public class Flight {
         this.status = status;
     }
 
+    /**
+     * Returns a string representation of the flight.
+     */
     @Override
     public String toString() {
-        // 定义日期时间格式
+        // define the date-time format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         return flightNumber + " | " +
                 departure + " -> " + destination + " | " +
@@ -126,44 +140,47 @@ public class Flight {
                 "Open for Reservation: " + (isOpenForReservation ? "Yes" : "No");
     }
 
-
-    //判断航班是否冲突
+    /**
+     * Determine whether flights conflict
+     * @param other - the flight to compare with this flight
+     * @return
+     */
     public boolean conflictsWith(Flight other) {
         return !(this.arrivalTime.isBefore(other.getDepartureTime()) ||
                 this.departureTime.isAfter(other.getArrivalTime()));
     }
 
     public String bookSeat(Passenger passenger, String seatType, String service) {
-        // 检查航班是否开放预定
+        // Check if the flight is open for booking
         if (!isOpenForReservation) {
             return "Reservation is closed for this flight.";
         }
 
-        // 检查座位类型是否合法
+        // Check if the seat type is valid
         if (!seatType.equalsIgnoreCase("FirstClass") && !seatType.equalsIgnoreCase("Economy")) {
             return "Invalid seat type. Please choose 'FirstClass' or 'Economy'.";
         }
 
-        // 检查预定与现有预定是否冲突
+        // Check if the passenger has any conflicts with other flights
         if (!passenger.isConflict(this)) {
             return "Conflict detected: Cannot book flight " + flightNumber;
         }
 
-        // 减少座位容量
+        // check and adjust capacity according to seat type
         if (!reduceSeatCapacity(seatType)) {
             return "No remaining seats in " + seatType + ".";
         }
 
-        // 添加乘客到列表
+        // Add passengers to the list
         passengers.add(passenger);
 
-        // 更新乘客自己的预定名单
+        // Update the passenger's own reservation list
         passenger.setReservations(this, seatType, service);
 
-        // 检查是否需要关闭预定
+        // Check if it is necessary to close the reservation
         checkReservationStatus();
 
-        // 返回结果消息
+        //Return result message
         String resultMessage = "Seat successfully booked for " + passenger.getName() + " in " + seatType + ".";
         if (vip.contains(passenger)) {
             resultMessage += " You can enjoy a 15% discount on the ticket price.";
@@ -171,6 +188,13 @@ public class Flight {
         return resultMessage;
     }
 
+    /**
+     * Reduces the seat capacity for the specified seat type by one if seats are available.
+     *
+     * @param seatType The type of seat to reduce capacity for (e.g., "FirstClass", "Economy").
+     * @return true if the seat capacity was successfully reduced, false if no seats are available
+     *         for the specified type or the type is invalid.
+     */
     private boolean reduceSeatCapacity(String seatType) {
         if (seatType.equalsIgnoreCase("FirstClass")) {
             if (firstClassCapacity > 0) {
@@ -186,7 +210,13 @@ public class Flight {
         return false;
     }
 
-    //用户取消预定后，修改对应座位数,vip用户免除此次费用
+    /**
+     * Updates the flight's seat availability and processes cancellation fees when a passenger cancels their booking.
+     * VIP passengers are exempted from the cancellation fee.
+     *
+     * @param seatType  The type of seat being canceled (e.g., "FirstClass", "Economy").
+     * @param passenger The passenger canceling their booking.
+     */
     public void update(String seatType, Passenger passenger) {
         if (vip.contains(passenger)) {
             System.out.println("You are a VIP, so we will waive the service fee for you this time");
@@ -198,7 +228,7 @@ public class Flight {
             economyClassCapacity++;
             System.out.println("You need to pay an additional 10% of the economy-class ticket price as a handling fee");
         }
-        // 从乘客列表中删除该乘客
+        // Remove the passenger from the passenger list
         if (passengers.contains(passenger)) {
             passengers.remove(passenger);
             System.out.println("Passenger " + passenger.getName() + " has been removed from the flight.");
@@ -207,7 +237,13 @@ public class Flight {
         }
     }
 
-    //用户修改预定后
+    /**
+     * Modifies a passenger's seat type booking and adjusts the seat capacity accordingly.
+     * VIP passengers are exempt from the service fee.
+     *
+     * @param newSeatType The new seat type the passenger wishes to switch to (e.g., "FirstClass", "Economy").
+     * @param passenger   The passenger requesting the modification.
+     */
     public void modify(String newSeatType, Passenger passenger) {
         if (newSeatType.equalsIgnoreCase("FirstClass")) {
             economyClassCapacity++;

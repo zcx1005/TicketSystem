@@ -2,14 +2,20 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Passenger {
-    private String name;
-    List<Reservation> reservations;
+    private String name;  // The name of the passenger
+    List<Reservation> reservations;  // A list of reservations made by the passenger
 
+    /**
+     * Constructor to initialize a Passenger with a name and a list of reservations.
+     * @param name The name of the passenger.
+     * @param reservations A list of reservations for the passenger.
+     */
     public Passenger(String name, List<Reservation> reservations) {
         this.name = name;
         this.reservations = reservations;
     }
 
+    //Getter
     public String getName() {
         return name;
     }
@@ -18,65 +24,78 @@ public class Passenger {
         return reservations;
     }
 
-    //订票成功后更新预定信息名单
+    //Setter
     public void setReservations(Flight flight, String sType, String ser) {
         Reservation res = new Reservation(flight, sType, ser);
-        reservations.add(res);
+        reservations.add(res);  // Add the new reservation to the list
     }
 
-    //判断与已预订航班是否冲突
+    /**
+     * Checks if there is a conflict between the current flight and the passenger's existing reservations.
+     * A conflict occurs if the passenger has already reserved a seat on a flight that overlaps with the current flight.
+     * @param flight The flight to check for conflicts with.
+     * @return True if there is no conflict with any existing reservation; false if a conflict is found.
+     */
     public boolean isConflict(Flight flight) {
         for (Reservation res : reservations) {
             if (res.getMyFlight().conflictsWith(flight)) {
-                return false;
+                return false;  // A conflict is found, return false
             }
         }
-        return true;
+        return true;  // No conflict
     }
 
-    //根据航班，取消现有预定
+    /**
+     * Cancels a reservation for a specific flight.
+     * This method will remove the reservation from the passenger's list and update the flight accordingly.
+     * @param flight The flight whose reservation is to be canceled.
+     */
     public void cancelReservation(Flight flight) {
         for (Reservation res : reservations) {
             if (res.getMyFlight().equals(flight)) {
-                reservations.remove(res);
+                reservations.remove(res);  // Remove the reservation from the list
                 System.out.println("Flight: " + flight.getFlightNumber()
                         + " canceled successfully.");
-                flight.update(res.getMySeatType(), this);
+                flight.update(res.getMySeatType(), this);  // Update the flight with the canceled reservation
                 return;
             }
         }
         System.out.println("Flight " + flight.getFlightNumber()
                 + " not found in reservations.");
-        return;
     }
 
-    //修改预定的航班
+    /**
+     * Modifies an existing reservation, changing the seat type and/or service.
+     * If the new seat type is available on the flight, the modification is successful.
+     * @param curFlight The current flight to modify.
+     * @param seatType The new seat type (e.g., "FirstClass", "Economy").
+     * @param service The new service type (e.g., "Meal", "Extra Luggage").
+     */
     public void modifyReservation(Flight curFlight, String seatType, String service) {
-        // 检查座位类型是否有效
+        // Check if the seat type is valid
         if (!seatType.equalsIgnoreCase("FirstClass") && !seatType.equalsIgnoreCase("Economy")) {
             System.out.println("Invalid seat type. Please choose 'FirstClass' or 'Economy'.");
             return;
         }
 
-        // 遍历当前乘客的所有预定信息
+        // Iterate through the reservations to find the current flight
         for (Reservation res : reservations) {
             if (res.getMyFlight().equals(curFlight)) {
-                // 如果座位类型没变化，直接退出
+                // If the seat type is unchanged, exit
                 if (res.getMySeatType().equals(seatType)) {
                     System.out.println("You have already booked this type of seat.");
                     return;
                 }
 
-                // 如果预定中有想修改的航班，并且想修改的座位类型有空位
+                // Check if the new seat type is available on the flight
                 if ((seatType.equalsIgnoreCase("FirstClass") && curFlight.getFirstClassCapacity() > 0) ||
                         (seatType.equalsIgnoreCase("Economy") && curFlight.getEconomyClassCapacity() > 0)) {
 
-                    // 修改航班中的座位数量，并更新预定信息
-                    curFlight.modify(seatType, this);
-                    res.setMySeatType(seatType);  // 修改预定信息中的座位类型
-                    res.setMyService(service);    // 修改预定信息中的增值服务
+                    // Modify the flight and reservation details
+                    curFlight.modify(seatType, this);  // Modify the flight's seat availability
+                    res.setMySeatType(seatType);  // Update the reservation's seat type
+                    res.setMyService(service);  // Update the reservation's service
 
-                    // 打印成功信息
                     System.out.println("You have successfully modified your reservation.");
                     return;
                 } else {
@@ -86,17 +105,25 @@ public class Passenger {
             }
         }
 
-        // 如果没有找到该航班的预定信息
+        // If no reservation was found for the specified flight
         System.out.println("Flight " + curFlight.getFlightNumber() + " not found in reservations.");
     }
 
-    //加入该航线的vip名单
+    /**
+     * Registers the passenger as a VIP for a specific flight.
+     * Adds the passenger to the flight's VIP list.
+     * @param flight The flight for which the passenger is being registered as a VIP.
+     */
     public void registerVip(Flight flight) {
-        flight.getVip().add(this);
+        flight.getVip().add(this);  // Add the passenger to the flight's VIP list
     }
 
+    /**
+     * Returns a string representation of the passenger's name and their reservations.
+     * @return A string representing the passenger's name and their reservations.
+     */
     @Override
     public String toString() {
-        return name + " " + reservations;
+        return name + " " + reservations;  // Return the name and reservations as a string
     }
 }

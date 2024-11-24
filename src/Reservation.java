@@ -1,44 +1,48 @@
 public class Reservation {
-    /*   private String reservationID; 预定信息是一个用户有多个信息，存在一个列表里
-    调用的时候，直接用列表的index调用就行了，这个预定ID多余*/
-    /*    private Passenger me;  问题同上，多余 */
+    /*   private String reservationID;  Reservation information is associated with multiple records for a user,
+        and these records are stored in a list. When accessed, you can use the index of the list directly,
+        so this reservation ID is unnecessary. */
+    /*    private Passenger me;  Same issue as above, unnecessary. */
     private Flight myFlight;
     private String mySeatType;
     private String myService;
 
-    //构造函数，初始化的时候可以输入预定的航班，航班的票务类型
+    // Constructor: Initializes the reservation with the flight, seat type, and service
     public Reservation(Flight flight, String seatType, String service) {
         this.myFlight = flight;
         this.myService = service;
         this.mySeatType = seatType;
     }
 
-    //获取航班
+    //Getter
     public Flight getMyFlight() {
         return myFlight;
     }
 
-    //获取该航班票务类型
     public String getMySeatType() {
         return mySeatType;
     }
 
-    //获取该航班所选的增值服务
+
     public String getService() {
         return myService;
     }
 
+
+    public String getMyService() {
+        return myService;
+    }
+
+    //Setter
     public void setMySeatType(String newSeatType) {
         mySeatType = newSeatType;
     }
+
 
     public void setMyService(String newService) {
         myService = newService;
     }
 
-    public String getMyService() {
-        return myService;
-    }
 
     @Override
     public String toString() {
@@ -46,5 +50,4 @@ public class Reservation {
                 "Seat Type: " + mySeatType + " | " +
                 "Service: " + myService;
     }
-
 }
